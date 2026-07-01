@@ -46,6 +46,15 @@ let finished = false;
 let acIndex = -1;              // autocomplete keyboard highlight
 let mode = "endless";         // "endless" | "daily"
 let soundOn = true;
+let hintIndex = 0;
+
+// progressive hints (least → most revealing)
+const HINTS = [
+  { label: "ภูมิภาค", get: a => a.region },
+  { label: "ตำแหน่ง", get: a => a.role },
+  { label: "สัญชาติ", get: a => a.nationality, flag: true },
+  { label: "อักษรแรกของชื่อ", get: a => a.handle[0].toUpperCase() + "…" },
+];
 
 // region accent themes: [--red, --red-2, --red-dark]
 const REGION_THEME = {
@@ -157,11 +166,75 @@ function resetBoard() {
   guessed = [];
   shareHistory = [];
   finished = false;
+  hintIndex = 0;
   $("gridBody").innerHTML = "";
   $("winCard").classList.add("hidden");
   $("guessInput").value = "";
   $("guessInput").disabled = false;
+  $("hintBar").innerHTML = "";
+  $("hintBtn").disabled = false;
+  $("giveupBtn").disabled = false;
   updateGuessCount();
+}
+
+/* ---------- Hint ---------- */
+function showHint() {
+  if (finished || hintIndex >= HINTS.length) return;
+  const h = HINTS[hintIndex++];
+  const chip = document.createElement("span");
+  chip.className = "hint-chip";
+  const f = h.flag ? flagUrl(h.get(answer)) : null;
+  chip.innerHTML = `<b>${h.label}:</b> ${f ? `<img class="hint-flag" src="${f}" alt="">` : ""}${h.get(answer)}`;
+  $("hintBar").appendChild(chip);
+  beep(500, 0.08, "sine", 0.09);
+  if (hintIndex >= HINTS.length) $("hintBtn").disabled = true;
+}
+
+/* ---------- Give up ---------- */
+function giveUp() {
+  if (finished) return;
+  if (!confirm("ยอมแพ้และดูคำตอบ?")) return;
+  finished = true;
+  $("guessInput").disabled = true;
+  $("hintBtn").disabled = true;
+  $("giveupBtn").disabled = true;
+  if (mode === "daily") saveDailyResult(false);
+  showLose();
+}
+function showLose() {
+  const card = $("winCard");
+  card.classList.remove("hidden");
+  card.classList.add("lose");
+  const flag = flagUrl(answer.nationality);
+  const daily = (() => { try { return JSON.parse(localStorage.getItem("vctdle_daily")); } catch { return null; } })();
+  const footer = mode === "daily"
+    ? `<div class="wc-count" id="dailyCountdown"></div>
+       <div class="wc-actions"><button class="wc-share" id="shareBtn">📋 แชร์ผล</button></div>`
+    : `<div class="wc-actions">
+         <button class="wc-again" id="againBtn">▶ เล่นอีกครั้ง</button>
+         <button class="wc-share" id="shareBtn">📋 แชร์ผล</button>
+       </div>`;
+  card.innerHTML = `
+    <button class="wc-close" id="closeBtn" aria-label="ปิด">✕</button>
+    <h2>🏳️ เฉลย</h2>
+    <div class="wc-count">${mode === "daily" ? "📅 โจทย์รายวัน · " : ""}ยอมแพ้หลังเดา ${guessed.length} ครั้ง${mode === "daily" && daily ? " · 🔥 streak รีเซ็ต" : ""}</div>
+    <div class="wc-body">
+      <img class="wc-photo" src="${answer.photoUrl || silhouette}" onerror="this.src='${silhouette}'" alt="">
+      <div class="wc-info">
+        <div class="wc-handle">${answer.handle}</div>
+        <div class="wc-sub">${flag ? `<img class="wc-flag" src="${flag}" alt="">` : ""}${answer.realName} · อายุ ${answer.age ?? "?"}</div>
+        <div class="wc-team">
+          ${answer.teamLogoUrl ? `<img src="${answer.teamLogoUrl}" onerror="this.style.display='none'" alt="">` : ""}
+          ${answer.team} · ${answer.role}${answer.igl ? " · IGL" : ""}
+        </div>
+      </div>
+    </div>
+    ${footer}
+  `;
+  const again = $("againBtn"); if (again) again.onclick = newGame;
+  $("shareBtn").onclick = copyShare;
+  const cb = $("closeBtn"); if (cb) cb.onclick = () => card.classList.add("hidden");
+  if (mode === "daily") startCountdown();
 }
 
 function newGame() {
@@ -189,9 +262,11 @@ function startDaily() {
   answer = PLAYERS[hashStr("vctdle-" + date) % PLAYERS.length]; // same for everyone, all regions
   let d = null;
   try { d = JSON.parse(localStorage.getItem("vctdle_daily")); } catch {}
-  if (d && d.date === date && d.solved) {          // already solved today
+  if (d && d.date === date && d.done) {            // already played today
     finished = true;
     $("guessInput").disabled = true;
+    $("hintBtn").disabled = true;
+    $("giveupBtn").disabled = true;
     showDailyDone(d);
   } else {
     $("guessInput").focus();
@@ -200,10 +275,14 @@ function startDaily() {
 function showDailyDone(d) {
   const card = $("winCard");
   card.classList.remove("hidden", "lose");
+  if (!d.solved) card.classList.add("lose");
+  const status = d.solved
+    ? `เดา ${d.guesses} ครั้ง · 🔥 streak ${d.streak}`
+    : `ยอมแพ้ · 🔥 streak รีเซ็ต`;
   card.innerHTML = `
     <button class="wc-close" id="closeBtn" aria-label="ปิด">✕</button>
     <h2>📅 โจทย์รายวันวันนี้เล่นแล้ว</h2>
-    <div class="wc-count">คำตอบ: <b>${answer.handle}</b> · ใช้ไป ${d.guesses} ครั้ง · 🔥 streak ${d.streak}</div>
+    <div class="wc-count">คำตอบ: <b>${answer.handle}</b> · ${status}</div>
     <div class="wc-body">
       <img class="wc-photo" src="${answer.photoUrl || silhouette}" onerror="this.src='${silhouette}'" alt="">
       <div class="wc-info">
@@ -351,8 +430,9 @@ function win() {
   $("guessInput").disabled = true;
   recordWin(guessed.length);
   soundWin();
+  $("hintBtn").disabled = true; $("giveupBtn").disabled = true;
   let daily = null;
-  if (mode === "daily") daily = saveDaily(guessed.length);
+  if (mode === "daily") daily = saveDailyResult(true);
   const card = $("winCard");
   card.classList.remove("hidden", "lose");
   const flag = flagUrl(answer.nationality);
@@ -390,19 +470,22 @@ function win() {
   launchConfetti();
 }
 
-function saveDaily(guesses) {
+function saveDailyResult(won) {
   const date = todayStr();
   let d = null;
   try { d = JSON.parse(localStorage.getItem("vctdle_daily")); } catch {}
-  let streak = 1;
-  if (d && d.lastDate) {
+  let streak = won ? 1 : 0;
+  if (won && d && d.lastSolved) {
     const y = new Date(); y.setDate(y.getDate() - 1);
     const yStr = y.getFullYear() + "-" + (y.getMonth() + 1) + "-" + y.getDate();
-    if (d.lastDate === date) streak = d.streak;
-    else if (d.lastDate === yStr) streak = (d.streak || 0) + 1;
+    if (d.lastSolved === date) streak = d.streak;              // already solved today
+    else if (d.lastSolved === yStr) streak = (d.streak || 0) + 1;
   }
   const best = Math.max(streak, (d && d.best) || 0);
-  const rec = { date, lastDate: date, solved: true, guesses, streak, best };
+  const rec = {
+    date, done: true, solved: won, guesses: guessed.length, streak, best,
+    lastSolved: won ? date : (d && d.lastSolved) || null,
+  };
   try { localStorage.setItem("vctdle_daily", JSON.stringify(rec)); } catch {}
   return rec;
 }
@@ -541,6 +624,10 @@ function wireEvents() {
       newGame();
     });
   });
+
+  // hint + give up
+  $("hintBtn").addEventListener("click", showHint);
+  $("giveupBtn").addEventListener("click", giveUp);
 
   // sound toggle
   $("soundBtn").addEventListener("click", () => {

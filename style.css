@@ -150,6 +150,24 @@ main { max-width: 1120px; margin: 0 auto; padding: 0 16px; }
 #guessInput:focus { border-color: var(--red); box-shadow: 0 0 0 4px rgba(255,70,85,.14), var(--shadow); }
 #guessInput::placeholder { color: #5c6570; }
 .guess-count { color: var(--muted); font-size: 13px; margin-top: 10px; height: 18px; font-weight: 600; }
+.game-actions { display: flex; gap: 10px; justify-content: center; margin-top: 4px; }
+.ga-btn {
+  background: var(--panel); color: var(--text); border: 1px solid var(--line-strong);
+  padding: 8px 16px; border-radius: 999px; font-size: 13px; font-weight: 800; cursor: pointer;
+  font-family: inherit; transition: all .16s;
+  clip-path: polygon(0 0, calc(100% - 7px) 0, 100% 7px, 100% 100%, 7px 100%, 0 calc(100% - 7px));
+}
+.ga-btn:hover:not(:disabled) { border-color: var(--red); transform: translateY(-1px); }
+.ga-btn.danger:hover:not(:disabled) { border-color: #e0464f; background: #2b1b1e; }
+.ga-btn:disabled { opacity: .4; cursor: default; }
+.hint-bar { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; max-width: 440px; margin: 12px auto 0; }
+.hint-chip {
+  background: rgba(240,192,74,.12); border: 1px solid var(--yellow-line); color: #f3d98a;
+  padding: 6px 12px; border-radius: 8px; font-size: 13px; font-weight: 700;
+  animation: acIn .2s ease;
+}
+.hint-chip b { color: #fff; font-weight: 800; }
+.hint-flag { width: 20px; height: 15px; object-fit: cover; border-radius: 3px; vertical-align: -2px; margin-right: 5px; box-shadow: 0 0 0 1px rgba(0,0,0,.4); }
 
 /* Autocomplete */
 .autocomplete {
