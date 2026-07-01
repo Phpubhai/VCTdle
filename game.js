@@ -48,7 +48,16 @@ let acIndex = -1;              // autocomplete keyboard highlight
 const $ = (id) => document.getElementById(id);
 
 /* ---------- Init ---------- */
+function initSplash() {
+  const s = $("splash");
+  if (!s) return;
+  const hide = () => { s.classList.add("hide"); setTimeout(() => s.remove(), 600); };
+  const t = setTimeout(hide, 2000);
+  s.addEventListener("click", () => { clearTimeout(t); hide(); });
+}
+
 async function init() {
+  initSplash();
   buildHeader();
   loadStats();
   if (Array.isArray(window.__PLAYERS__)) {
