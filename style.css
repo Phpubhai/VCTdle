@@ -234,10 +234,13 @@ main { max-width: 1120px; margin: 0 auto; padding: 0 16px; }
   background: linear-gradient(180deg, rgba(255,255,255,.08), transparent 42%);
 }
 @keyframes flip {
-  0% { transform: rotateX(-92deg) scale(.9); opacity: 0; }
-  60% { opacity: 1; }
-  100% { transform: rotateX(0) scale(1); opacity: 1; }
+  0%   { transform: perspective(500px) rotateX(-90deg) scale(.94); opacity: 0; }
+  45%  { opacity: 1; }
+  70%  { transform: perspective(500px) rotateX(10deg) scale(1.03); opacity: 1; }
+  85%  { transform: perspective(500px) rotateX(-4deg) scale(1); }
+  100% { transform: perspective(500px) rotateX(0) scale(1); opacity: 1; }
 }
+.grid-row { transform-style: preserve-3d; }
 .tile.g { background: linear-gradient(160deg, #1a4b32, var(--green-bg)); border-color: var(--green-line); box-shadow: 0 0 16px rgba(53,208,127,.22), inset 0 1px 0 rgba(255,255,255,.05); }
 .tile.y { background: linear-gradient(160deg, #4d3f13, var(--yellow-bg)); border-color: var(--yellow-line); box-shadow: 0 0 16px rgba(240,192,74,.18), inset 0 1px 0 rgba(255,255,255,.05); }
 .tile.r { background: linear-gradient(160deg, #52272f, var(--redx)); border-color: var(--redx-line); }
@@ -300,13 +303,84 @@ main { max-width: 1120px; margin: 0 auto; padding: 0 16px; }
 .autocomplete::-webkit-scrollbar, .grid-scroll::-webkit-scrollbar { height: 8px; width: 8px; }
 .autocomplete::-webkit-scrollbar-thumb, .grid-scroll::-webkit-scrollbar-thumb { background: var(--line-strong); border-radius: 8px; }
 
-/* Responsive */
-@media (max-width: 640px) {
-  :root { --tile: 64px; }
-  .logo { font-size: 38px; letter-spacing: 2px; }
-  .stats-bar { gap: 7px; }
-  .stat-num { font-size: 21px; }
-  .gh { font-size: 9px; }
-  .tile { font-size: 10px; border-radius: 9px; }
-  .tile .agebig, .tile .yn { font-size: 18px; }
+/* ===================== Valorant tactical theme ===================== */
+/* thin hazard accent line pinned to top of viewport */
+body::after {
+  content: ""; position: fixed; top: 0; left: 0; right: 0; height: 3px; z-index: 150;
+  background: linear-gradient(90deg, var(--red) 0 18%, transparent 30% 70%, var(--red) 82% 100%);
+  pointer-events: none;
 }
+/* notched (angular) buttons + chips — signature Valorant corner cut */
+.chip, .new-game-btn {
+  clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+}
+.wc-again, .wc-share {
+  clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+}
+/* notched tiles with INSET glow (outer glow would be clipped) */
+.tile {
+  clip-path: polygon(7px 0, 100% 0, 100% calc(100% - 7px), calc(100% - 7px) 100%, 0 100%, 0 7px);
+}
+.tile.g { box-shadow: inset 0 0 16px rgba(53,208,127,.35), inset 0 1px 0 rgba(255,255,255,.06); }
+.tile.y { box-shadow: inset 0 0 16px rgba(240,192,74,.32), inset 0 1px 0 rgba(255,255,255,.06); }
+.tile.r { box-shadow: inset 0 0 14px rgba(255,70,85,.14); }
+/* tactical corner brackets around the guess board */
+.grid-wrap { position: relative; }
+.grid-wrap::before, .grid-wrap::after {
+  content: ""; position: absolute; width: 24px; height: 24px; pointer-events: none;
+  border: 2px solid var(--red); opacity: .45;
+}
+.grid-wrap::before { top: -4px; left: 2px; border-right: none; border-bottom: none; }
+.grid-wrap::after { bottom: 30px; right: 2px; border-left: none; border-top: none; }
+/* header side brackets */
+.logo { position: relative; display: inline-block; }
+.logo::before, .logo::after {
+  content: ""; position: absolute; top: 8%; height: 84%; width: 11px; opacity: .7;
+  border: 3px solid var(--red);
+}
+.logo::before { left: -26px; border-right: none; }
+.logo::after { right: -26px; border-left: none; }
+.tagline { text-transform: uppercase; letter-spacing: 2px; font-size: 12px; }
+.filter-label, .stat-lbl, .gh { letter-spacing: 1px; }
+
+/* ===================== Mobile ===================== */
+@media (max-width: 760px) {
+  main { padding: 0 10px; }
+  .grid-scroll {
+    overflow-x: auto; -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x proximity; padding-left: 6px; padding-right: 6px;
+    scrollbar-width: thin;
+  }
+  .grid-header, .grid-row { justify-content: flex-start; }
+  .grid-scroll::after {
+    content: "← เลื่อนดูตารางได้ →"; display: block; text-align: center;
+    color: #5c6570; font-size: 11px; padding-top: 6px; letter-spacing: .5px;
+  }
+}
+@media (max-width: 640px) {
+  :root { --tile: 62px; }
+  .site-header { padding: 30px 12px 4px; }
+  .logo { font-size: 36px; letter-spacing: 2px; }
+  .logo::before, .logo::after { display: none; }
+  .tagline { font-size: 11px; letter-spacing: 1px; padding: 0 6px; }
+  .filter-bar { gap: 8px; margin: 16px 0 10px; }
+  .filter-label { width: 100%; text-align: center; }
+  .stats-bar { gap: 6px; max-width: 100%; }
+  .stat { padding: 8px 4px; }
+  .stat-num { font-size: 20px; }
+  .stat-lbl { font-size: 9.5px; }
+  #guessInput { font-size: 16px; padding: 13px 15px; }
+  .gh { font-size: 9px; min-height: 30px; }
+  .tile { font-size: 10px; }
+  .tile .agebig, .tile .yn { font-size: 17px; }
+  .tile .flag { width: 26px; height: 20px; }
+  .tile .teamlogo, .tile .regionlogo, .tile .agenticon { width: 28px; height: 28px; }
+  .win-card { margin: 16px 8px 4px; padding: 16px; }
+  .wc-photo { width: 74px; height: 74px; }
+  .wc-info .wc-handle { font-size: 20px; }
+  .wc-actions { gap: 8px; }
+  .wc-again, .wc-share { padding: 11px 18px; font-size: 14px; }
+  .legend { font-size: 11px; }
+  .splash-logo { font-size: 40px; }
+}
+@media (max-width: 400px) { :root { --tile: 56px; } }

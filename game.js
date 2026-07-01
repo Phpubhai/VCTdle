@@ -143,7 +143,7 @@ function makeTile(col, guess, i) {
   const key = col.key;
   const tile = document.createElement("div");
   tile.className = "tile";
-  tile.style.animationDelay = (i * 0.09) + "s";
+  tile.style.animationDelay = (i * 0.11) + "s";
 
   if (key === "player") {
     tile.classList.add("player-tile");
