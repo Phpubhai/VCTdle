@@ -2304,7 +2304,7 @@
     "role": "Sentinel",
     "igl": false,
     "signatureAgent": "Killjoy",
-    "hasInternational": false,
+    "hasInternational": true,
     "hasRegional": true,
     "photoUrl": "https://owcdn.net/img/696cbe19de8ff.png",
     "teamLogoUrl": "https://owcdn.net/img/62fe0b8f6b084.png"
@@ -2334,7 +2334,7 @@
     "role": "Duelist",
     "igl": false,
     "signatureAgent": "Jett",
-    "hasInternational": false,
+    "hasInternational": true,
     "hasRegional": true,
     "photoUrl": "https://owcdn.net/img/696cbe96ec066.png",
     "teamLogoUrl": "https://owcdn.net/img/62fe0b8f6b084.png"
@@ -2349,7 +2349,7 @@
     "role": "Controller",
     "igl": false,
     "signatureAgent": "Omen",
-    "hasInternational": false,
+    "hasInternational": true,
     "hasRegional": false,
     "photoUrl": "https://owcdn.net/img/696cbeb2ce31f.png",
     "teamLogoUrl": "https://owcdn.net/img/62fe0b8f6b084.png"
@@ -2394,7 +2394,7 @@
     "role": "Controller",
     "igl": true,
     "signatureAgent": "Omen",
-    "hasInternational": false,
+    "hasInternational": true,
     "hasRegional": false,
     "photoUrl": "https://owcdn.net/img/6757d389c06f5.png",
     "teamLogoUrl": "https://owcdn.net/img/629f13085ead6.png"
@@ -2589,7 +2589,7 @@
     "role": "Duelist",
     "igl": true,
     "signatureAgent": "Jett",
-    "hasInternational": false,
+    "hasInternational": true,
     "hasRegional": true,
     "photoUrl": "https://owcdn.net/img/69d5f87b7c32d.png",
     "teamLogoUrl": "https://owcdn.net/img/6399bb707aacb.png"
@@ -2604,7 +2604,7 @@
     "role": "Initiator",
     "igl": false,
     "signatureAgent": "Sova",
-    "hasInternational": false,
+    "hasInternational": true,
     "hasRegional": true,
     "photoUrl": "https://owcdn.net/img/69d5f8a5ee90d.png",
     "teamLogoUrl": "https://owcdn.net/img/6399bb707aacb.png"
@@ -2619,7 +2619,7 @@
     "role": "Sentinel",
     "igl": false,
     "signatureAgent": "Killjoy",
-    "hasInternational": false,
+    "hasInternational": true,
     "hasRegional": true,
     "photoUrl": "https://owcdn.net/img/69d5f885417ec.png",
     "teamLogoUrl": "https://owcdn.net/img/6399bb707aacb.png"
@@ -2634,7 +2634,7 @@
     "role": "Controller",
     "igl": false,
     "signatureAgent": "Omen",
-    "hasInternational": false,
+    "hasInternational": true,
     "hasRegional": true,
     "photoUrl": "https://owcdn.net/img/69d5f88fbaaa2.png",
     "teamLogoUrl": "https://owcdn.net/img/6399bb707aacb.png"
@@ -2649,7 +2649,7 @@
     "role": "Duelist",
     "igl": false,
     "signatureAgent": "Raze",
-    "hasInternational": false,
+    "hasInternational": true,
     "hasRegional": true,
     "photoUrl": "https://owcdn.net/img/69d5f899c514c.png",
     "teamLogoUrl": "https://owcdn.net/img/6399bb707aacb.png"
