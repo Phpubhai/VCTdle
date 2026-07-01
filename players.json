@@ -384,7 +384,7 @@
     "role": "Controller",
     "igl": true,
     "signatureAgent": "Omen",
-    "hasInternational": false,
+    "hasInternational": true,
     "hasRegional": true,
     "photoUrl": "https://owcdn.net/img/69234b213a609.png",
     "teamLogoUrl": "https://owcdn.net/img/61b8888cc3860.png"
@@ -399,7 +399,7 @@
     "role": "Initiator",
     "igl": false,
     "signatureAgent": "Sova",
-    "hasInternational": false,
+    "hasInternational": true,
     "hasRegional": true,
     "photoUrl": "https://owcdn.net/img/69234b7d30781.png",
     "teamLogoUrl": "https://owcdn.net/img/61b8888cc3860.png"
@@ -414,7 +414,7 @@
     "role": "Sentinel",
     "igl": false,
     "signatureAgent": "Killjoy",
-    "hasInternational": false,
+    "hasInternational": true,
     "hasRegional": false,
     "photoUrl": "https://owcdn.net/img/69234aef86f4b.png",
     "teamLogoUrl": "https://owcdn.net/img/61b8888cc3860.png"
@@ -444,7 +444,7 @@
     "role": "Duelist",
     "igl": false,
     "signatureAgent": "Jett",
-    "hasInternational": false,
+    "hasInternational": true,
     "hasRegional": true,
     "photoUrl": "https://owcdn.net/img/69234b72ce3db.png",
     "teamLogoUrl": "https://owcdn.net/img/61b8888cc3860.png"
@@ -3613,5 +3613,20 @@
     "hasRegional": true,
     "photoUrl": "https://owcdn.net/img/67826152e8ca0.png",
     "teamLogoUrl": "https://owcdn.net/img/642233fc01f26.png"
+  },
+  {
+    "handle": "GLYPH",
+    "realName": "Conner Garcia",
+    "nationality": "United States",
+    "age": 22,
+    "team": "ENVY",
+    "region": "Americas",
+    "role": "Controller",
+    "igl": false,
+    "signatureAgent": "Omen",
+    "hasInternational": false,
+    "hasRegional": false,
+    "photoUrl": "https://owcdn.net/img/697768b42430b.png",
+    "teamLogoUrl": "https://owcdn.net/img/5f3ca822464a3.png"
   }
 ]
