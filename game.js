@@ -40,6 +40,7 @@ let PLAYERS = [];
 let AGENT_ICONS = {};          // lowercased agent name -> icon url
 let answer = null;
 let guessed = [];              // handles already guessed
+let shareHistory = [];         // chronological array of state-rows for share grid
 let activeRegions = new Set(["Americas","EMEA","Pacific","China"]);
 let finished = false;
 let acIndex = -1;              // autocomplete keyboard highlight
@@ -95,6 +96,7 @@ function newGame() {
   if (!p.length) { alert("เลือกอย่างน้อย 1 ภูมิภาค"); return; }
   answer = p[Math.floor(Math.random() * p.length)];
   guessed = [];
+  shareHistory = [];
   finished = false;
   $("gridBody").innerHTML = "";
   $("winCard").classList.add("hidden");
@@ -207,6 +209,7 @@ function submitGuess(player) {
   if (finished || !player) return;
   if (guessed.includes(player.handle)) return;
   guessed.unshift(player.handle);
+  shareHistory.push(COLUMNS.filter(c => c.key !== "player").map(c => cmp(c.key, player)));
   renderGuessRow(player, true);
   updateGuessCount();
   $("guessInput").value = "";
@@ -222,23 +225,72 @@ function win() {
   recordWin(guessed.length);
   const card = $("winCard");
   card.classList.remove("hidden", "lose");
+  const flag = flagUrl(answer.nationality);
+  const rlogo = REGION_LOGO[answer.region];
   card.innerHTML = `
-    <h2>🎉 ถูกต้อง! ใช้ไป ${guessed.length} ครั้ง</h2>
+    ${rlogo ? `<img class="wc-region" src="${rlogo}" onerror="this.style.display='none'" alt="">` : ""}
+    <h2>🎉 ถูกต้อง!</h2>
+    <div class="wc-count">เดา ${guessed.length} ครั้ง</div>
     <div class="wc-body">
       <img class="wc-photo" src="${answer.photoUrl || silhouette}" onerror="this.src='${silhouette}'" alt="">
       <div class="wc-info">
         <div class="wc-handle">${answer.handle}</div>
-        <div class="wc-sub">${answer.realName} · ${answer.nationality} · อายุ ${answer.age ?? "?"}</div>
+        <div class="wc-sub">${flag ? `<img class="wc-flag" src="${flag}" alt="">` : ""}${answer.realName} · อายุ ${answer.age ?? "?"}</div>
         <div class="wc-team">
           ${answer.teamLogoUrl ? `<img src="${answer.teamLogoUrl}" onerror="this.style.display='none'" alt="">` : ""}
-          ${answer.team} · ${answer.region} · ${answer.role}${answer.igl ? " · IGL" : ""}
+          ${answer.team} · ${answer.role}${answer.igl ? " · IGL" : ""}
         </div>
       </div>
     </div>
-    <button class="wc-again" id="againBtn">▶ เล่นอีกครั้ง</button>
+    <div class="wc-actions">
+      <button class="wc-again" id="againBtn">▶ เล่นอีกครั้ง</button>
+      <button class="wc-share" id="shareBtn">📋 แชร์ผล</button>
+    </div>
   `;
   $("againBtn").onclick = newGame;
+  $("shareBtn").onclick = copyShare;
   card.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  launchConfetti();
+}
+
+/* ---------- Share (Wordle-style) ---------- */
+function buildShareText() {
+  const emoji = { g: "🟩", y: "🟨", r: "🟥", n: "⬛" };
+  const rows = shareHistory.map(r => r.map(s => emoji[s] || "⬛").join("")).join("\n");
+  return `VCTdle 🎯 ${guessed.length} ครั้ง\n${rows}\nhttps://phpubhai.github.io/VCTdle/`;
+}
+function copyShare() {
+  const txt = buildShareText();
+  const btn = $("shareBtn");
+  const done = () => { if (btn) { btn.textContent = "✓ คัดลอกแล้ว!"; setTimeout(() => { btn.textContent = "📋 แชร์ผล"; }, 1800); } };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(txt).then(done, () => fallbackCopy(txt, done));
+  } else fallbackCopy(txt, done);
+}
+function fallbackCopy(txt, done) {
+  const ta = document.createElement("textarea");
+  ta.value = txt; ta.style.position = "fixed"; ta.style.opacity = "0";
+  document.body.appendChild(ta); ta.select();
+  try { document.execCommand("copy"); done(); } catch (e) {}
+  ta.remove();
+}
+
+/* ---------- Confetti ---------- */
+function launchConfetti() {
+  const colors = ["#ff4655", "#35d07f", "#f0c04a", "#2ad4d4", "#ffffff"];
+  const box = document.createElement("div");
+  box.className = "confetti";
+  for (let i = 0; i < 70; i++) {
+    const s = document.createElement("span");
+    s.style.left = (Math.random() * 100) + "%";
+    s.style.background = colors[i % colors.length];
+    s.style.animationDelay = (Math.random() * 0.7) + "s";
+    s.style.animationDuration = (1.6 + Math.random() * 1.6) + "s";
+    s.style.transform = `rotate(${Math.random() * 360}deg)`;
+    box.appendChild(s);
+  }
+  document.body.appendChild(box);
+  setTimeout(() => box.remove(), 3600);
 }
 
 /* ---------- Autocomplete ---------- */
