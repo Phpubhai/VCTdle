@@ -1,0 +1,7 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+*.log
+
+# Local dev config (not needed for hosting)
+.claude/

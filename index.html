@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VCTdle — เดาโปรเพลเยอร์ VCT 2026</title>
+  <link rel="preconnect" href="https://owcdn.net">
+  <link rel="preconnect" href="https://flagcdn.com">
+  <link rel="preconnect" href="https://media.valorant-api.com">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="site-header">
+    <h1 class="logo">VCT<span>dle</span></h1>
+    <p class="tagline">เดาโปรเพลเยอร์ VCT 2026 — พิมพ์ชื่อผู้เล่นแล้วดูคำใบ้จากสี</p>
+  </header>
+
+  <main>
+    <!-- Region filter -->
+    <section class="filter-bar" aria-label="ตัวกรองภูมิภาค">
+      <span class="filter-label">คำตอบจากลีก:</span>
+      <div class="filter-chips" id="filterChips">
+        <button class="chip active" data-region="Americas"><img src="assets/regions/americas.png" alt="" onerror="this.style.display='none'">Americas</button>
+        <button class="chip active" data-region="EMEA"><img src="assets/regions/emea.png" alt="" onerror="this.style.display='none'">EMEA</button>
+        <button class="chip active" data-region="Pacific"><img src="assets/regions/pacific.png" alt="" onerror="this.style.display='none'">Pacific</button>
+        <button class="chip active" data-region="China"><img src="assets/regions/china.png" alt="" onerror="this.style.display='none'">China</button>
+      </div>
+      <button class="new-game-btn" id="newGameBtn" title="สุ่มผู้เล่นใหม่">↻ เกมใหม่</button>
+    </section>
+
+    <!-- Stats -->
+    <section class="stats-bar" id="statsBar">
+      <div class="stat"><span class="stat-num" id="statPlayed">0</span><span class="stat-lbl">เล่นไป</span></div>
+      <div class="stat"><span class="stat-num" id="statWins">0</span><span class="stat-lbl">ชนะ</span></div>
+      <div class="stat"><span class="stat-num" id="statStreak">0</span><span class="stat-lbl">ต่อเนื่อง</span></div>
+      <div class="stat"><span class="stat-num" id="statBest">0</span><span class="stat-lbl">สถิติสูงสุด</span></div>
+    </section>
+
+    <!-- Search -->
+    <section class="search-wrap">
+      <div class="search-box">
+        <input type="text" id="guessInput" placeholder="พิมพ์ชื่อผู้เล่น เช่น aspas, TenZ, Derke…"
+               autocomplete="off" spellcheck="false" aria-label="ช่องเดาผู้เล่น">
+        <div class="autocomplete" id="autocomplete"></div>
+      </div>
+      <div class="guess-count" id="guessCount"></div>
+    </section>
+
+    <!-- Result card (win) -->
+    <section class="win-card hidden" id="winCard"></section>
+
+    <!-- Guess grid -->
+    <section class="grid-wrap">
+      <div class="grid-scroll">
+        <div class="grid-header" id="gridHeader"></div>
+        <div class="grid-body" id="gridBody"></div>
+      </div>
+      <p class="legend">
+        <span class="lg g">เขียว</span> = ตรง &nbsp;·&nbsp;
+        <span class="lg y">เหลือง</span> = ใกล้เคียง (สัญชาติ = ลีกเดียวกัน / อายุ = ห่าง 1 ปี) &nbsp;·&nbsp;
+        <span class="lg r">แดง</span> = ไม่ตรง &nbsp;·&nbsp; ▲ คำตอบมากกว่า / ▼ น้อยกว่า
+      </p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    ข้อมูลผู้เล่น VCT 2026 · จัดทำเพื่อความบันเทิง · รูปภาพจาก vlr.gg / Liquipedia
+  </footer>
+
+  <script src="players-data.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
