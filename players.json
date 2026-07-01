@@ -985,7 +985,7 @@
     "igl": false,
     "signatureAgent": "Sova",
     "hasInternational": true,
-    "hasRegional": false,
+    "hasRegional": true,
     "photoUrl": "https://owcdn.net/img/687e2c376a05d.png",
     "teamLogoUrl": "https://owcdn.net/img/62a40cc2b5e29.png"
   },
@@ -1795,7 +1795,7 @@
     "igl": false,
     "signatureAgent": "Sova",
     "hasInternational": false,
-    "hasRegional": true,
+    "hasRegional": false,
     "photoUrl": "https://owcdn.net/img/682d95bed801b.png",
     "teamLogoUrl": "https://owcdn.net/img/63972e548cdc9.png"
   },
@@ -1810,7 +1810,7 @@
     "igl": false,
     "signatureAgent": "Jett",
     "hasInternational": false,
-    "hasRegional": true,
+    "hasRegional": false,
     "photoUrl": "https://owcdn.net/img/682d95ad8a7a4.png",
     "teamLogoUrl": "https://owcdn.net/img/63972e548cdc9.png"
   },
@@ -2455,7 +2455,7 @@
     "igl": false,
     "signatureAgent": "Raze",
     "hasInternational": false,
-    "hasRegional": true,
+    "hasRegional": false,
     "photoUrl": "https://owcdn.net/img/6a3f3a8513b83.png",
     "teamLogoUrl": "https://owcdn.net/img/62a411783d94d.png"
   },
@@ -2500,7 +2500,7 @@
     "igl": false,
     "signatureAgent": "Cypher",
     "hasInternational": false,
-    "hasRegional": true,
+    "hasRegional": false,
     "photoUrl": "https://owcdn.net/img/6a3f3b45eb0eb.png",
     "teamLogoUrl": "https://owcdn.net/img/62a411783d94d.png"
   },
