@@ -201,6 +201,7 @@ function showDailyDone(d) {
   const card = $("winCard");
   card.classList.remove("hidden", "lose");
   card.innerHTML = `
+    <button class="wc-close" id="closeBtn" aria-label="ปิด">✕</button>
     <h2>📅 โจทย์รายวันวันนี้เล่นแล้ว</h2>
     <div class="wc-count">คำตอบ: <b>${answer.handle}</b> · ใช้ไป ${d.guesses} ครั้ง · 🔥 streak ${d.streak}</div>
     <div class="wc-body">
@@ -214,6 +215,7 @@ function showDailyDone(d) {
     <div class="wc-actions"><button class="wc-share" id="shareBtn">📋 แชร์ผล</button></div>
   `;
   $("shareBtn").onclick = copyShare;
+  const cb = $("closeBtn"); if (cb) cb.onclick = () => card.classList.add("hidden");
   startCountdown();
 }
 function startCountdown() {
@@ -364,6 +366,7 @@ function win() {
          <button class="wc-share" id="shareBtn">📋 แชร์ผล</button>
        </div>`;
   card.innerHTML = `
+    <button class="wc-close" id="closeBtn" aria-label="ปิด">✕</button>
     ${rlogo ? `<img class="wc-region" src="${rlogo}" onerror="this.style.display='none'" alt="">` : ""}
     <h2>🎉 ถูกต้อง!</h2>
     <div class="wc-count">${mode === "daily" ? "📅 โจทย์รายวัน · " : ""}เดา ${guessed.length} ครั้ง</div>
@@ -382,8 +385,8 @@ function win() {
   `;
   const again = $("againBtn"); if (again) again.onclick = newGame;
   $("shareBtn").onclick = copyShare;
+  const cb = $("closeBtn"); if (cb) cb.onclick = () => card.classList.add("hidden");
   if (mode === "daily") startCountdown();
-  card.scrollIntoView({ behavior: "smooth", block: "nearest" });
   launchConfetti();
 }
 
