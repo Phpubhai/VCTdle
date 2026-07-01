@@ -74,6 +74,26 @@ body > * { position: relative; z-index: 1; }
 
 main { max-width: 1120px; margin: 0 auto; padding: 0 16px; }
 
+/* Mode + sound bar */
+.mode-bar { display: flex; align-items: center; justify-content: center; gap: 12px; margin: 18px 0 4px; flex-wrap: wrap; }
+.mode-toggle {
+  display: inline-flex; background: var(--panel); border: 1px solid var(--line-strong);
+  border-radius: 999px; padding: 3px; backdrop-filter: blur(8px);
+}
+.mode-btn {
+  background: transparent; color: var(--muted); border: none; cursor: pointer;
+  padding: 8px 16px; border-radius: 999px; font-size: 13px; font-weight: 800; font-family: inherit;
+  transition: all .18s;
+}
+.mode-btn.active { background: linear-gradient(180deg, var(--red-2), var(--red)); color: #fff; box-shadow: 0 3px 12px rgba(255,70,85,.3); }
+.sound-btn {
+  background: var(--panel); border: 1px solid var(--line-strong); cursor: pointer;
+  width: 40px; height: 40px; border-radius: 50%; font-size: 17px; line-height: 1;
+  transition: all .18s;
+}
+.sound-btn:hover { border-color: var(--red); transform: translateY(-1px); }
+.filter-bar.dim { opacity: .35; pointer-events: none; filter: grayscale(.4); transition: opacity .2s; }
+
 /* Filter bar */
 .filter-bar {
   display: flex; align-items: center; gap: 12px; flex-wrap: wrap;

@@ -44,6 +44,17 @@ let shareHistory = [];         // chronological array of state-rows for share gr
 let activeRegions = new Set(["Americas","EMEA","Pacific","China"]);
 let finished = false;
 let acIndex = -1;              // autocomplete keyboard highlight
+let mode = "endless";         // "endless" | "daily"
+let soundOn = true;
+
+// region accent themes: [--red, --red-2, --red-dark]
+const REGION_THEME = {
+  Americas: ["#ff7a2f", "#ff9a5c", "#c9591d"],
+  EMEA:     ["#e6395a", "#ff5c78", "#b02742"],
+  Pacific:  ["#17b8ce", "#45d6e8", "#0e8493"],
+  China:    ["#ff4655", "#ff6b78", "#c22d3b"],
+  default:  ["#ff4655", "#ff6b78", "#c22d3b"],
+};
 
 const $ = (id) => document.getElementById(id);
 
@@ -72,9 +83,51 @@ async function init() {
       return;
     }
   }
+  loadPrefs();
   wireEvents();
+  applyTheme();
   newGame();
 }
+
+/* ---------- Prefs (mode / sound) ---------- */
+function loadPrefs() {
+  try {
+    soundOn = localStorage.getItem("vctdle_sound") !== "off";
+    if (localStorage.getItem("vctdle_mode") === "daily") mode = "daily";
+  } catch {}
+  const sb = $("soundBtn"); if (sb) sb.textContent = soundOn ? "🔊" : "🔇";
+  document.querySelectorAll(".mode-btn").forEach(b => b.classList.toggle("active", b.dataset.mode === mode));
+  const fb = $("filterChips").closest(".filter-bar"); if (fb) fb.classList.toggle("dim", mode === "daily");
+}
+
+/* ---------- Region accent theme ---------- */
+function applyTheme() {
+  const key = activeRegions.size === 1 ? [...activeRegions][0] : "default";
+  const [r, r2, rd] = REGION_THEME[key] || REGION_THEME.default;
+  const s = document.documentElement.style;
+  s.setProperty("--red", r);
+  s.setProperty("--red-2", r2);
+  s.setProperty("--red-dark", rd);
+}
+
+/* ---------- Sound (WebAudio, no assets) ---------- */
+let audioCtx = null;
+function beep(freq, dur, type, vol, when) {
+  if (!soundOn) return;
+  try {
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    const t = audioCtx.currentTime + (when || 0);
+    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o.type = type || "sine"; o.frequency.value = freq;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(vol || 0.14, t + 0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(t); o.stop(t + dur + 0.02);
+  } catch (e) {}
+}
+function soundGuess() { beep(300, 0.09, "triangle", 0.10); }
+function soundWin() { [523, 659, 784, 1047].forEach((f, i) => beep(f, 0.32, "sine", 0.15, i * 0.085)); }
 
 async function fetchAgentIcons() {
   try {
@@ -100,10 +153,7 @@ function buildHeader() {
 function pool() {
   return PLAYERS.filter(p => activeRegions.has(p.region));
 }
-function newGame() {
-  const p = pool();
-  if (!p.length) { alert("เลือกอย่างน้อย 1 ภูมิภาค"); return; }
-  answer = p[Math.floor(Math.random() * p.length)];
+function resetBoard() {
   guessed = [];
   shareHistory = [];
   finished = false;
@@ -112,9 +162,74 @@ function newGame() {
   $("guessInput").value = "";
   $("guessInput").disabled = false;
   updateGuessCount();
+}
+
+function newGame() {
+  if (mode === "daily") { startDaily(); return; }
+  const p = pool();
+  if (!p.length) { alert("เลือกอย่างน้อย 1 ภูมิภาค"); return; }
+  resetBoard();
+  answer = p[Math.floor(Math.random() * p.length)];
   $("guessInput").focus();
-  // console cheat for testing
-  // console.log("answer:", answer.handle);
+}
+
+/* ---------- Daily mode ---------- */
+function todayStr() {
+  const d = new Date();
+  return d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate();
+}
+function hashStr(s) {
+  let h = 2166136261 >>> 0;
+  for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return h >>> 0;
+}
+function startDaily() {
+  resetBoard();
+  const date = todayStr();
+  answer = PLAYERS[hashStr("vctdle-" + date) % PLAYERS.length]; // same for everyone, all regions
+  let d = null;
+  try { d = JSON.parse(localStorage.getItem("vctdle_daily")); } catch {}
+  if (d && d.date === date && d.solved) {          // already solved today
+    finished = true;
+    $("guessInput").disabled = true;
+    showDailyDone(d);
+  } else {
+    $("guessInput").focus();
+  }
+}
+function showDailyDone(d) {
+  const card = $("winCard");
+  card.classList.remove("hidden", "lose");
+  card.innerHTML = `
+    <h2>📅 โจทย์รายวันวันนี้เล่นแล้ว</h2>
+    <div class="wc-count">คำตอบ: <b>${answer.handle}</b> · ใช้ไป ${d.guesses} ครั้ง · 🔥 streak ${d.streak}</div>
+    <div class="wc-body">
+      <img class="wc-photo" src="${answer.photoUrl || silhouette}" onerror="this.src='${silhouette}'" alt="">
+      <div class="wc-info">
+        <div class="wc-handle">${answer.handle}</div>
+        <div class="wc-sub">${answer.team} · ${answer.region}</div>
+      </div>
+    </div>
+    <div class="wc-count" id="dailyCountdown"></div>
+    <div class="wc-actions"><button class="wc-share" id="shareBtn">📋 แชร์ผล</button></div>
+  `;
+  $("shareBtn").onclick = copyShare;
+  startCountdown();
+}
+function startCountdown() {
+  const el = $("dailyCountdown");
+  if (!el) return;
+  const tick = () => {
+    const now = new Date();
+    const next = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+    const s = Math.max(0, Math.floor((next - now) / 1000));
+    const hh = String(Math.floor(s / 3600)).padStart(2, "0");
+    const mm = String(Math.floor((s % 3600) / 60)).padStart(2, "0");
+    const ss = String(s % 60).padStart(2, "0");
+    el.textContent = `โจทย์ใหม่ในอีก ${hh}:${mm}:${ss}`;
+  };
+  tick();
+  clearInterval(window.__cd); window.__cd = setInterval(tick, 1000);
 }
 
 function updateGuessCount() {
@@ -225,6 +340,7 @@ function submitGuess(player) {
   closeAutocomplete();
 
   if (player.handle === answer.handle) win();
+  else soundGuess();
 }
 
 /* ---------- Win ---------- */
@@ -232,14 +348,25 @@ function win() {
   finished = true;
   $("guessInput").disabled = true;
   recordWin(guessed.length);
+  soundWin();
+  let daily = null;
+  if (mode === "daily") daily = saveDaily(guessed.length);
   const card = $("winCard");
   card.classList.remove("hidden", "lose");
   const flag = flagUrl(answer.nationality);
   const rlogo = REGION_LOGO[answer.region];
+  const footer = mode === "daily"
+    ? `<div class="wc-count">🔥 streak รายวัน: ${daily.streak} (สูงสุด ${daily.best})</div>
+       <div class="wc-count" id="dailyCountdown"></div>
+       <div class="wc-actions"><button class="wc-share" id="shareBtn">📋 แชร์ผล</button></div>`
+    : `<div class="wc-actions">
+         <button class="wc-again" id="againBtn">▶ เล่นอีกครั้ง</button>
+         <button class="wc-share" id="shareBtn">📋 แชร์ผล</button>
+       </div>`;
   card.innerHTML = `
     ${rlogo ? `<img class="wc-region" src="${rlogo}" onerror="this.style.display='none'" alt="">` : ""}
     <h2>🎉 ถูกต้อง!</h2>
-    <div class="wc-count">เดา ${guessed.length} ครั้ง</div>
+    <div class="wc-count">${mode === "daily" ? "📅 โจทย์รายวัน · " : ""}เดา ${guessed.length} ครั้ง</div>
     <div class="wc-body">
       <img class="wc-photo" src="${answer.photoUrl || silhouette}" onerror="this.src='${silhouette}'" alt="">
       <div class="wc-info">
@@ -251,22 +378,38 @@ function win() {
         </div>
       </div>
     </div>
-    <div class="wc-actions">
-      <button class="wc-again" id="againBtn">▶ เล่นอีกครั้ง</button>
-      <button class="wc-share" id="shareBtn">📋 แชร์ผล</button>
-    </div>
+    ${footer}
   `;
-  $("againBtn").onclick = newGame;
+  const again = $("againBtn"); if (again) again.onclick = newGame;
   $("shareBtn").onclick = copyShare;
+  if (mode === "daily") startCountdown();
   card.scrollIntoView({ behavior: "smooth", block: "nearest" });
   launchConfetti();
+}
+
+function saveDaily(guesses) {
+  const date = todayStr();
+  let d = null;
+  try { d = JSON.parse(localStorage.getItem("vctdle_daily")); } catch {}
+  let streak = 1;
+  if (d && d.lastDate) {
+    const y = new Date(); y.setDate(y.getDate() - 1);
+    const yStr = y.getFullYear() + "-" + (y.getMonth() + 1) + "-" + y.getDate();
+    if (d.lastDate === date) streak = d.streak;
+    else if (d.lastDate === yStr) streak = (d.streak || 0) + 1;
+  }
+  const best = Math.max(streak, (d && d.best) || 0);
+  const rec = { date, lastDate: date, solved: true, guesses, streak, best };
+  try { localStorage.setItem("vctdle_daily", JSON.stringify(rec)); } catch {}
+  return rec;
 }
 
 /* ---------- Share (Wordle-style) ---------- */
 function buildShareText() {
   const emoji = { g: "🟩", y: "🟨", r: "🟥", n: "⬛" };
   const rows = shareHistory.map(r => r.map(s => emoji[s] || "⬛").join("")).join("\n");
-  return `VCTdle 🎯 ${guessed.length} ครั้ง\n${rows}\nhttps://phpubhai.github.io/VCTdle/`;
+  const head = mode === "daily" ? `VCTdle 📅 ${todayStr()}` : "VCTdle 🎯";
+  return `${head} ${guessed.length} ครั้ง\n${rows}\nhttps://phpubhai.github.io/VCTdle/`;
 }
 function copyShare() {
   const txt = buildShareText();
@@ -378,8 +521,30 @@ function wireEvents() {
         if (activeRegions.size === 1) return; // keep at least one
         activeRegions.delete(r); chip.classList.remove("active");
       } else { activeRegions.add(r); chip.classList.add("active"); }
+      applyTheme();
       newGame();
     });
+  });
+
+  // mode toggle
+  $("modeToggle").querySelectorAll(".mode-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const m = btn.dataset.mode;
+      if (m === mode) return;
+      mode = m;
+      try { localStorage.setItem("vctdle_mode", mode); } catch {}
+      document.querySelectorAll(".mode-btn").forEach(b => b.classList.toggle("active", b.dataset.mode === mode));
+      const fb = $("filterChips").closest(".filter-bar"); if (fb) fb.classList.toggle("dim", mode === "daily");
+      newGame();
+    });
+  });
+
+  // sound toggle
+  $("soundBtn").addEventListener("click", () => {
+    soundOn = !soundOn;
+    try { localStorage.setItem("vctdle_sound", soundOn ? "on" : "off"); } catch {}
+    $("soundBtn").textContent = soundOn ? "🔊" : "🔇";
+    if (soundOn) beep(660, 0.12, "sine", 0.12);
   });
 
   $("newGameBtn").addEventListener("click", () => {
