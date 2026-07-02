@@ -2692,7 +2692,7 @@
     "team": "EDward Gaming",
     "region": "China",
     "role": "Controller",
-    "igl": true,
+    "igl": false,
     "signatureAgent": "Omen",
     "hasInternational": true,
     "hasRegional": true,
